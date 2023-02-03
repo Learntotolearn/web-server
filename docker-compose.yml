@@ -1,13 +1,4 @@
 version: '3.5'
-
-networks:
-  whmcs:
-    driver: ${NETWORKS_DRIVER}
-
-volumes:
-  mysql:
-    driver: ${VOLUMES_DRIVER}
-
 services:
 
 # nginx
@@ -23,10 +14,9 @@ services:
       - ./.data/logs-nginx/:/var/log/nginx
     ports:
       - ${NGINX_PORT_HTTP}:80
+      - 443:443
     depends_on:
       - php-fpm
-    networks:
-      - whmcs
 
 # PHP-FPM
   php-fpm:
@@ -38,12 +28,6 @@ services:
       - ./php-fpm/php${PHP_VERSION}.ini:/usr/local/etc/php/php.ini
     expose:
       - "9000"
-    environment:
-      - PHP_IDE_CONFIG=xwhmcs
-    extra_hosts:
-      - "dockerhost:${DOCKER_HOST_IP}"
-    networks:
-      - whmcs
 
 # MySQL
   mysql:
@@ -61,14 +45,4 @@ services:
       - ./mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     ports:
       - "${MYSQL_PORT}:3306"
-    networks:
-      - whmcs
 
-# maildev - to test emails
-  maildev:
-    build: ./maildev
-    ports:
-      - "${MAILDEV_HTTP_PORT}:80"
-      - "${MAILDEV_SMTP_PORT}:25"
-    networks:
-      - whmcs
